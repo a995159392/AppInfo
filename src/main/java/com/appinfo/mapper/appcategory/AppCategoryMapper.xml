@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.appinfo.mapper.appcategory.AppCategoryMapper">
+		<select id="getCategory" resultType="com.appinfo.pojo.AppCategory">
+			select * 
+			  from  app_category
+			  <where>
+			  	<if test="parentId !=null and parentId != 0">
+			  		parentId=#{parentId}
+			  	</if>
+			  		<if test="parentId ==null or parentId == 0">
+			  		parentId is NULL
+			  	</if>
+			  </where>
+		
+		</select>
+</mapper>
+
+

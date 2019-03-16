@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.appinfo.mapper.appinfo.AppInfoMapper">
+	<!--查询用户APP列表 -->
+	<select id="getByDevUser" resultType="com.appinfo.pojo.AppInfo">
+		SELECT
+		a.`id`,a.`softwareName`,a.`APKName`,a.`softwareSize`,a.`downloads`,a.status,a.versionId,
+		(SELECT c.`categoryName` FROM `app_category` c WHERE
+		a.`categoryLevel1`=c.id ) AS categoryLevel1Name,
+		(SELECT
+		c.`categoryName` FROM `app_category` c WHERE a.`categoryLevel2`=c.id
+		)
+		AS categoryLevel2Name,
+		(SELECT c.`categoryName` FROM `app_category` c
+		WHERE a.`categoryLevel3`=c.id
+		) AS categoryLevel3Name,
+		(SELECT
+		`valueName` FROM `data_dictionary` b WHERE b.valueId = a.`flatformId`
+		AND b.`typeCode` ="APP_FLATFORM") AS flatformName,
+		(SELECT `valueName`
+		FROM `data_dictionary` b WHERE b.valueId = a.`status` AND
+		b.`typeCode`
+		="APP_STATUS") AS statusName,
+		(SELECT `versionNo` FROM `app_version` v
+		WHERE v.id=a.`versionId`) AS
+		versionNo
+		FROM `app_info` a
+		<where>
+			<if test="softwareName != null and softwareName !=''">
+				softwareName like concat('%',#{softwareName},'%')
+			</if>
+			<if test="status != null and softwareName !=0">
+				and status=#{status}
+			</if>
+			<if test="categoryLevel3 != null and categoryLevel3 !=0">
+				and categoryLevel3=#{categoryLevel3}
+			</if>
+			<if test="categoryLevel2 != null and categoryLevel2 !=0">
+				and categoryLevel2=#{categoryLevel2}
+			</if>
+			<if test="categoryLevel1 != null and categoryLevel1 !=0">
+				and categoryLevel1=#{categoryLevel1}
+			</if>
+			<if test="flatformId != null and flatformId !=0">
+				and flatformId=#{flatformId}
+			</if>
+			<if test="devUserId != null and devUserId !=0">
+				and devId=#{devUserId}
+			</if>
+		</where>
+		ORDER BY `creationDate` DESC
+		limit #{pageIndex},#{pageSize}
+	</select>
+
+	<!--查询用户APP总数 -->
+	<select id="getDevUserCount" resultType="Integer">
+		select count(1)
+		from app_info
+		<where>
+			<if test="softwareName != null and softwareName !=''">
+				softwareName like concat('%',#{softwareName},'%')
+			</if>
+			<if test="status != null and status !=0">
+				and status=#{status}
+			</if>
+			<if test="categoryLevel3 != null and categoryLevel3 !=0">
+				and categoryLevel3=#{categoryLevel3}
+			</if>
+			<if test="categoryLevel2 != null and categoryLevel2 !=0">
+				and categoryLevel2=#{categoryLevel2}
+			</if>
+			<if test="categoryLevel1 != null and categoryLevel1 !=0">
+				and categoryLevel1=#{categoryLevel1}
+			</if>
+			<if test="flatformId != null and flatformId !=0">
+				and flatformId=#{flatformId}
+			</if>
+			<if test="devUserId != null and devUserId !=0">
+				and devId=#{devUserId}
+			</if>
+		</where>
+	</select>
+	<!--重名验证 -->
+	<select id="checkAPKName" resultType="Integer">
+		select count(1)
+		from
+		app_info
+		where APKName =#{APKname}
+	</select>
+	<!--新增AppInf信息 -->
+	<insert id="saveAddAppInfo">
+		INSERT INTO `appinfodb`.`app_info` (
+		`softwareName`,
+		`APKName`,
+		`supportROM`,
+		`interfaceLanguage`,
+		`softwareSize`,
+		`updateDate`,
+		`devId`,
+		`appInfo`,
+		`status`,
+		`onSaleDate`,
+		`offSaleDate`,
+		`flatformId`,
+		`categoryLevel3`,
+		`downloads`,
+		`createdBy`,
+		`creationDate`,
+		`modifyBy`,
+		`modifyDate`,
+		`categoryLevel1`,
+		`categoryLevel2`,
+		`logoPicPath`,
+		`logoLocPath`,
+		`versionId`
+		)
+		VALUES
+		(
+		#{softwareName},
+		#{APKName},
+		#{supportROM},
+		#{interfaceLanguage},
+		#{softwareSize},
+		#{updateDate},
+		#{devId},
+		#{appInfo},
+		#{status},
+		#{onSaleDate},
+		#{offSaleDate},
+		#{flatformId},
+		#{categoryLevel3},
+		#{downloads},
+		#{createdBy},
+		#{creationDate},
+		#{modifyBy},
+		#{modifyDate},
+		#{categoryLevel1},
+		#{categoryLevel2},
+		#{logoPicPath},
+		#{logoLocPath},
+		#{versionId}
+		)
+	</insert>
+	<!--通过ID查询详情 -->
+
+	<select id="getById" resultType="com.appinfo.pojo.AppInfo">
+		select a.* ,
+		(SELECT `valueName`
+		FROM `data_dictionary` b WHERE b.valueId = a.`status` AND b.`typeCode`
+		="APP_STATUS") AS statusName
+		from app_info a
+		where id=#{id}
+	</select>
+
+	<!--删除APP图片 -->
+	<update id="updataLogPic">
+		UPDATE
+		`appinfodb`.`app_info`
+		SET
+		`logoPicPath` = NULL,
+		`logoLocPath` = NULL
+		WHERE `id` = #{id}
+	</update>
+	<update id="updateById" >
+		UPDATE
+		`appinfodb`.`app_info`
+		<set>
+			`softwareName` = #{softwareName},
+			`APKName` = #{APKName},
+			`supportROM` = #{supportROM},
+			`interfaceLanguage` = #{interfaceLanguage},
+			`softwareSize` = #{softwareSize},
+			`updateDate` = #{updateDate},
+			`devId` = #{devId},
+			`appInfo` = #{appInfo},
+			`onSaleDate` = #{onSaleDate},
+			`offSaleDate` = #{offSaleDate},
+			`flatformId` = #{flatformId},
+			`categoryLevel3` = #{categoryLevel3},
+			`downloads` = #{downloads},
+			`createdBy` = #{createdBy},
+			`creationDate` = #{creationDate},
+			`modifyBy` = #{modifyBy},
+			`modifyDate` = #{modifyDate},
+			`categoryLevel1` = #{categoryLevel1},
+			`categoryLevel2` = #{categoryLevel2},
+			`logoPicPath` = #{logoPicPath},
+			`logoLocPath` = #{logoLocPath},
+			`versionId` = #{versionId} 
+		</set>
+		where id=#{id}
+	</update>
+	<!--提交重新审核  -->
+	<update id="updateStatusById">
+		update app_info
+		   set status='1'
+		 where id=#{id}
+	</update>
+	<!--通过ID查询  -->
+	<select id="getAppInfoById" resultType="com.appinfo.pojo.AppInfo">
+	SELECT
+		a.*,
+		(SELECT c.`categoryName` FROM `app_category` c WHERE
+		a.`categoryLevel1`=c.id ) AS categoryLevel1Name,
+		(SELECT
+		c.`categoryName` FROM `app_category` c WHERE a.`categoryLevel2`=c.id
+		)
+		AS categoryLevel2Name,
+		(SELECT c.`categoryName` FROM `app_category` c
+		WHERE a.`categoryLevel3`=c.id
+		) AS categoryLevel3Name,
+		(SELECT
+		`valueName` FROM `data_dictionary` b WHERE b.valueId = a.`flatformId`
+		AND b.`typeCode` ="APP_FLATFORM") AS flatformName,
+		(SELECT `valueName`
+		FROM `data_dictionary` b WHERE b.valueId = a.`status` AND
+		b.`typeCode`
+		="APP_STATUS") AS statusName,
+		(SELECT `versionNo` FROM `app_version` v
+		WHERE v.id=a.`versionId`) AS
+		versionNo
+		FROM `app_info` a
+		<where>
+			<if test="id != 0 and id != null">
+				id=#{id}
+			</if>
+		</where>
+	</select>
+	
+	<update id="updateVersionId">
+		update app_info 
+			set versionId=#{versionId}
+			where id = #{id}
+	</update>
+	<update id="updateSatus">
+		update app_info 
+			set status=#{status}
+			where id = #{id}
+	</update>
+	<delete id="delById">
+		DELETE
+		  FROM app_info
+		 WHERE id=#{id}
+	</delete>
+</mapper>

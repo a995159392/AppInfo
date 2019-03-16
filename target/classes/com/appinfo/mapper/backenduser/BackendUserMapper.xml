@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.appinfo.mapper.backenduser.BackendUserMapper">
+		<select id="doLogin" resultType="com.appinfo.pojo.BackendUser">
+			select b.*,
+			(select d.valueName from data_dictionary d
+			  where d.typeCode="USER_TYPE"
+			    and d.valueId = b.userType) as userTypeName
+			  from  backend_user b
+			 where userCode =#{userCode}
+		</select>
+		
+</mapper>
